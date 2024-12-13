@@ -48,14 +48,14 @@ public class GameController {
     
     
     public String manualMatch(Player p1, Player p2, Player p3, Player p4) {
-        if (playerList.size() >= 4) {
-        Match match = new Match(p1, p2, p3, p4);
-        matchHistory.add(match);
-        return match.toString();
-        }
-        else {
-            return "Not enough players to create a match.";
-        }
+            if (playerList.size() >= 4) {
+                Match match = new Match(p1, p2, p3, p4);
+                matchHistory.add(match);
+                return match.toString();
+            }
+            else {
+                return "Not enough players to create a match.";
+            }
     }
 
     // Delete a match and adjust player statistics

@@ -23,6 +23,9 @@ dependencies {
 
     // This dependency is used by the application.
     implementation(libs.guava)
+
+    // Add the FlatLaf dependency correctly
+    implementation("com.formdev:flatlaf:3.5.4")
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
@@ -36,7 +39,7 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "badmintonqueueingsystem.MainView"
+    mainClass.set("badmintonqueueingsystem.MainView")
 }
 
 tasks.named<Test>("test") {
