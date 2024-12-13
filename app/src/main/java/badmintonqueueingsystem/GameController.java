@@ -9,8 +9,14 @@ public class GameController {
 
     // Add a player to the list
     public void addPlayerToList(Player player) {
+        for (Player existingPlayer : playerList) {
+            if (existingPlayer.getName().equalsIgnoreCase(player.getName())) {
+                throw new IllegalArgumentException("Player with this name already exists.");
+            }
+        }
         playerList.add(player);
     }
+    
 
     // Manually create a match by selecting random players
     public String createMatch() {
@@ -48,23 +54,34 @@ public class GameController {
     
     
     public String manualMatch(Player p1, Player p2, Player p3, Player p4) {
-            if (playerList.size() >= 4) {
-                Match match = new Match(p1, p2, p3, p4);
-                matchHistory.add(match);
-                return match.toString();
-            }
-            else {
-                return "Not enough players to create a match.";
-            }
+        if (p1.equals(p2) || p1.equals(p3) || p1.equals(p4) || p2.equals(p3) || p2.equals(p4) || p3.equals(p4)) {
+            return "A match cannot have duplicate players.";
+        }
+
+        if (playerList.size() >= 4) {
+            Match match = new Match(p1, p2, p3, p4);
+            matchHistory.add(match);
+            return "Match created: " + match.toString();
+        } else {
+            return "Not enough players to create a match.";
+        }
     }
+    
 
     // Delete a match and adjust player statistics
     public String deleteMatch(int matchIndex) {
+        Match match = matchHistory.get(matchIndex);
+
         if (matchIndex < 0 || matchIndex >= matchHistory.size()) {
             return "Invalid match index.";
         }
-
-        Match match = matchHistory.remove(matchIndex);
+        
+        else if (match.isConcluded()) {
+            return "You cannot delete a concluded match.";
+        }
+        
+        else {
+        matchHistory.remove(matchIndex);
 
         // Adjust match count for players in the deleted match
         match.getTeam1Player1().decrementMatchesPlayed();
@@ -73,6 +90,7 @@ public class GameController {
         match.getTeam2Player2().decrementMatchesPlayed();
 
         return "Match deleted successfully.";
+        }
     }
 
     // Delete a player from the player list and matches
@@ -108,5 +126,14 @@ public class GameController {
     // Get player list
     public ArrayList<Player> getPlayerList() {
         return new ArrayList<>(playerList);
+    }
+    // Find a player by their name
+    public Player getPlayerByName(String name) {
+        for (Player player : playerList) {
+            if (player.getName().equalsIgnoreCase(name)) {
+                return player;
+            }
+        }
+        return null; // Return null if no matching player is found
     }
 }

@@ -101,38 +101,35 @@ public class MainView {
 
         tabbedPane.addTab("Matches", matchPanel);
 
-        // Stats Panel
-        JPanel statsPanel = new JPanel(new BorderLayout());
-        JButton viewStatsButton = new JButton("View Stats");
-        JTextArea statsArea = new JTextArea();
-        statsArea.setEditable(false);
-        statsArea.setBorder(BorderFactory.createTitledBorder("Player Stats"));
+        // Sidebar for player stats
+        JPanel sidebar = new JPanel(new BorderLayout());
+        sidebar.setBorder(BorderFactory.createTitledBorder("Player Stats"));
+        sidebar.setPreferredSize(new Dimension(200, frame.getHeight()));
 
-        statsPanel.add(viewStatsButton, BorderLayout.NORTH);
-        statsPanel.add(new JScrollPane(statsArea), BorderLayout.CENTER);
+        JTextArea playerStatsArea = new JTextArea();
+        playerStatsArea.setEditable(false);
+        sidebar.add(new JScrollPane(playerStatsArea), BorderLayout.CENTER);
+        // Create a split panel with the tabbed pane on the left and the sidebar on the right
+        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, tabbedPane, sidebar);
+        splitPane.setDividerLocation(600); // Adjust the divider location as needed
+        splitPane.setResizeWeight(0.8);    // Allocate more space to the tabbedPane
+        frame.add(splitPane);
 
-        tabbedPane.addTab("Stats", statsPanel);
 
         // Add Player Button Action
         addPlayerButton.addActionListener(e -> {
             String name = nameField.getText();
             String level = (String) levelComboBox.getSelectedItem();
-
+        
             if (name != null && !name.isEmpty() && level != null) {
-                Player player = new Player(name, level);
-                
-                // Add listener to update the list view
-                player.addListener(() -> {
-                    int index = controller.getPlayerList().indexOf(player);
-                    if (index != -1) {
-                        playerListModel.set(index, player.toString());
-                    }
-                });
-                
-                controller.addPlayerToList(player);
-                playerListModel.addElement(player.toString());
-                nameField.setText("");
-                levelComboBox.setSelectedIndex(-1);
+                try {
+                    Player player = new Player(name, level);
+                    controller.addPlayerToList(player);
+                    playerListModel.addElement(player.toString());
+                    nameField.setText("");
+                } catch (IllegalArgumentException ex) {
+                    JOptionPane.showMessageDialog(frame, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
             } else {
                 JOptionPane.showMessageDialog(frame, "Please fill in all fields!", "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -195,20 +192,19 @@ public class MainView {
             }
         });
 
-        // View Stats Button Action
-        viewStatsButton.addActionListener(e -> {
-            String playerName = JOptionPane.showInputDialog(frame, "Enter player name to view stats:");
-        
-            if (playerName != null && !playerName.isEmpty()) {
+        playerListView.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && playerListView.getSelectedValue() != null) {
+                String selectedPlayer = playerListView.getSelectedValue();
                 for (Player player : controller.getPlayerList()) {
-                    if (player.getName().equalsIgnoreCase(playerName)) {
-                        statsArea.setText(controller.getPlayerStats(player));
+                    if (selectedPlayer.equals(player.toString())) {
+                        playerStatsArea.setText(controller.getPlayerStats(player));
                         return;
                     }
                 }
-                JOptionPane.showMessageDialog(frame, "Player not found in the list.", "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
+        
+        
 
 
         deleteMatchButton.addActionListener(e -> {
@@ -248,7 +244,7 @@ public class MainView {
         });
         
         // Add tabbedPane to frame
-        frame.add(tabbedPane);
+        frame.add(splitPane);
         frame.setVisible(true);
 
     }
