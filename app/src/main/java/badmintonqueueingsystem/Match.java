@@ -1,5 +1,8 @@
 package badmintonqueueingsystem;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Match {
     private Player team1Player1;
     private Player team1Player2;
@@ -17,6 +20,25 @@ public class Match {
         this.team1Score = 0;
         this.team2Score = 0;
         this.concluded = false;
+    }
+
+    public void concludeMatch(boolean team1Wins) {
+        team1Player1.addMatch();
+        team1Player2.addMatch();
+        team2Player1.addMatch();
+        team2Player2.addMatch();
+        if (team1Wins) {
+            team1Player1.addWin();
+            team1Player2.addWin();
+            team2Player1.addLoss();
+            team2Player2.addLoss();
+        } else {
+            team1Player1.addLoss();
+            team1Player2.addLoss();
+            team2Player1.addWin();
+            team2Player2.addWin();
+        }
+        concluded = true;
     }
 
     // Getters
@@ -58,9 +80,22 @@ public class Match {
         this.concluded = concluded;
     }
 
+    /**
+     * Returns a list of all players involved in this match.
+     * @return List of players
+     */
+    public List<Player> getPlayers() {
+        List<Player> players = new ArrayList<>();
+        players.add(team1Player1);
+        players.add(team1Player2);
+        players.add(team2Player1);
+        players.add(team2Player2);
+        return players;
+    }
+
     @Override
     public String toString() {
-        return "Team (" + team1Player1.getName() + " & " + team1Player2.getName() + ") " +
-               team1Score + " - " + team2Score + " Team (" + team2Player1.getName() + " & " + team2Player2.getName() + ")";
+        return "Team (" + team1Player1.getName() + " & " + team1Player2.getName() + ") vs " +
+               "Team (" + team2Player1.getName() + " & " + team2Player2.getName() + ")";
     }
 }

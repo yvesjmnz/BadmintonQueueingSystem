@@ -31,35 +31,60 @@ public class GameController {
         }
     }
 
-    // Input results for a match
-    public String recordMatchResult(int matchIndex, int team1Score, int team2Score) {
+    public String recordMatchResult(int matchIndex, boolean team1Wins) {
+        if (matchIndex < 0 || matchIndex >= matchHistory.size()) {
+            return "Invalid match index.";
+        }
+    
+        Match match = matchHistory.get(matchIndex);
+        if (match.isConcluded()) {
+            return "This match has already been concluded: " + match.toString();
+        }
+        // Determine the winner and update wins/losses
+        match.concludeMatch(team1Wins);
+    
+        return match.toString();
+    }
+    
+    
+    public String manualMatch(Player p1, Player p2, Player p3, Player p4) {
+        if (playerList.size() >= 4) {
+        Match match = new Match(p1, p2, p3, p4);
+        matchHistory.add(match);
+        return match.toString();
+        }
+        else {
+            return "Not enough players to create a match.";
+        }
+    }
+
+    // Delete a match and adjust player statistics
+    public String deleteMatch(int matchIndex) {
         if (matchIndex < 0 || matchIndex >= matchHistory.size()) {
             return "Invalid match index.";
         }
 
-        Match match = matchHistory.get(matchIndex);
-        if (match.isConcluded()) {
-            return "This match has already been concluded." + match.toString();
-        }
+        Match match = matchHistory.remove(matchIndex);
 
-        match.setScores(team1Score, team2Score);
-        match.setConcluded(true);
+        // Adjust match count for players in the deleted match
+        match.getTeam1Player1().decrementMatchesPlayed();
+        match.getTeam1Player2().decrementMatchesPlayed();
+        match.getTeam2Player1().decrementMatchesPlayed();
+        match.getTeam2Player2().decrementMatchesPlayed();
 
-        // Update player stats
-        if (team1Score > team2Score) {
-            match.getTeam1Player1().addWin();
-            match.getTeam1Player2().addWin();
-            match.getTeam2Player1().addLoss();
-            match.getTeam2Player2().addLoss();
-        } else {
-            match.getTeam2Player1().addWin();
-            match.getTeam2Player2().addWin();
-            match.getTeam1Player1().addLoss();
-            match.getTeam1Player2().addLoss();
-        }
-
-        return "Match results recorded: " + match.toString();
+        return "Match deleted successfully.";
     }
+
+    // Delete a player from the player list and matches
+    public String deletePlayer(Player player) {
+        if (!playerList.contains(player)) {
+            return "Player not found in the list.";
+        }
+
+        playerList.remove(player);
+        return "Player deleted successfully.";
+    }
+
 
     // Display match history
     public ArrayList<String> getMatchHistory() {
