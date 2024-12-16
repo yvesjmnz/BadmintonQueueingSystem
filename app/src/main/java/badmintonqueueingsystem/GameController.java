@@ -69,29 +69,25 @@ public class GameController {
     
 
     // Delete a match and adjust player statistics
-    public String deleteMatch(int matchIndex) {
+    public boolean deleteMatch(int matchIndex, StringBuilder message) {
+        if (matchIndex < 0 || matchIndex >= matchHistory.size()) {
+            message.append("Invalid match index.");
+            return false; // Deletion failed
+        }
+
         Match match = matchHistory.get(matchIndex);
 
-        if (matchIndex < 0 || matchIndex >= matchHistory.size()) {
-            return "Invalid match index.";
+        if (match.isConcluded()) {
+            message.append("You cannot delete a concluded match.");
+            return false; // Deletion failed
         }
-        
-        else if (match.isConcluded()) {
-            return "You cannot delete a concluded match.";
-        }
-        
-        else {
+
+        // Successful deletion
         matchHistory.remove(matchIndex);
-
-        // Adjust match count for players in the deleted match
-        match.getTeam1Player1().decrementMatchesPlayed();
-        match.getTeam1Player2().decrementMatchesPlayed();
-        match.getTeam2Player1().decrementMatchesPlayed();
-        match.getTeam2Player2().decrementMatchesPlayed();
-
-        return "Match deleted successfully.";
-        }
+        message.append("Match deleted successfully.");
+        return true; // Deletion successful
     }
+
 
     // Delete a player from the player list and matches
     public String deletePlayer(Player player) {
@@ -120,7 +116,8 @@ public class GameController {
                 "Level: " + player.getLevel() + "\n" +
                 "Matches Played: " + player.getMatchesPlayed() + "\n" +
                 "Wins: " + player.getWins() + "\n" +
-                "Losses: " + player.getLosses();
+                "Losses: " + player.getLosses() + "\n" + 
+                "Fees Due: " + player.getFeesDue();
     }
 
     // Get player list

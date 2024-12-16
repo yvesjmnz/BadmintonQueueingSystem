@@ -9,7 +9,7 @@ public class MainView {
     public MainView() {
         // Set a modern look and feel
         try {
-            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatLightLaf());
+            UIManager.setLookAndFeel(new com.formdev.flatlaf.FlatDarkLaf());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -176,6 +176,13 @@ public class MainView {
         });
 
         manualMatchButton.addActionListener(e -> {
+            // Check if there are enough players to create a match
+            if (controller.getPlayerList().size() < 4) {
+                JOptionPane.showMessageDialog(frame, "Not enough players to create a manual match. Please add more players.", 
+                                              "Error", JOptionPane.ERROR_MESSAGE);
+                return; // Exit the method gracefully
+            }
+        
             // Ask user to manually pick 4 players for the match
             Player p1 = (Player) JOptionPane.showInputDialog(frame, "Select Team 1 Player 1:", 
                 "Manual Match", JOptionPane.QUESTION_MESSAGE, null, controller.getPlayerList().toArray(), null);
@@ -185,13 +192,17 @@ public class MainView {
                 "Manual Match", JOptionPane.QUESTION_MESSAGE, null, controller.getPlayerList().toArray(), null);
             Player p4 = (Player) JOptionPane.showInputDialog(frame, "Select Team 2 Player 2:", 
                 "Manual Match", JOptionPane.QUESTION_MESSAGE, null, controller.getPlayerList().toArray(), null);
-
+        
+            // Check that all players were selected
             if (p1 != null && p2 != null && p3 != null && p4 != null) {
                 String result = controller.manualMatch(p1, p2, p3, p4);
                 matchHistoryModel.addElement(result);
+            } else {
+                JOptionPane.showMessageDialog(frame, "Match creation was canceled or incomplete. Please try again.", 
+                                              "Warning", JOptionPane.WARNING_MESSAGE);
             }
         });
-
+        
         playerListView.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting() && playerListView.getSelectedValue() != null) {
                 String selectedPlayer = playerListView.getSelectedValue();
@@ -210,14 +221,28 @@ public class MainView {
         deleteMatchButton.addActionListener(e -> {
             int selectedMatchIndex = matchHistoryView.getSelectedIndex();
             if (selectedMatchIndex == -1) {
-                JOptionPane.showMessageDialog(frame, "Please select a match to delete.", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Please select a match to delete.",
+                                              "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
-
-            String result = controller.deleteMatch(selectedMatchIndex);
-            matchHistoryModel.remove(selectedMatchIndex);
-            JOptionPane.showMessageDialog(frame, result);
+        
+            // Prepare a StringBuilder to receive the result message
+            StringBuilder resultMessage = new StringBuilder();
+            boolean isDeleted = controller.deleteMatch(selectedMatchIndex, resultMessage);
+        
+            if (isDeleted) {
+                // Remove the match from the view only if deletion was successful
+                matchHistoryModel.remove(selectedMatchIndex);
+                JOptionPane.showMessageDialog(frame, resultMessage.toString(),
+                                              "Success", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                // Show the appropriate error message
+                JOptionPane.showMessageDialog(frame, resultMessage.toString(),
+                                              "Error", JOptionPane.ERROR_MESSAGE);
+            }
         });
+        
+        
 
         deletePlayerButton.addActionListener(e -> {
             String playerName = JOptionPane.showInputDialog(frame, "Enter player name to delete:");

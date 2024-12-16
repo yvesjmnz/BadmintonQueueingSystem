@@ -27,6 +27,7 @@ public class Match {
         team1Player2.addMatch();
         team2Player1.addMatch();
         team2Player2.addMatch();
+        System.out.println("debug :Matches should be incremented now");
         if (team1Wins) {
             team1Player1.addWin();
             team1Player2.addWin();
